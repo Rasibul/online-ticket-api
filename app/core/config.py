@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
 
     database_uri: str
-  
+    database_name: str
 
     frontend_url: str = "http://localhost:5173"
 
