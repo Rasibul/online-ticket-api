@@ -24,6 +24,14 @@ app = FastAPI(
 )
 
 
+@app.get("/")
+async def root():
+    return {
+        "success": True,
+        "message": "Online Ticket Booking API is running",
+    }
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_url],
