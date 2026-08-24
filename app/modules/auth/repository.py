@@ -44,3 +44,44 @@ async def create_user(data:dict):
     result = await db.users.insert_one(data)
 
     return result.inserted_id
+
+
+async def find_user_by_verification_token(
+    token:str
+):
+
+    db = get_database()
+
+
+    return await db.users.find_one(
+        {
+            "verification_token": token
+        }
+    )
+
+
+async def verify_user(
+    user_id
+):
+
+    db = get_database()
+
+
+    await db.users.update_one(
+
+        {
+            "_id": user_id
+        },
+
+        {
+            "$set":
+            {
+                "is_verified": True,
+
+                "verification_token": None,
+
+                "verification_token_expiry": None
+            }
+        }
+
+    )

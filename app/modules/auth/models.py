@@ -1,15 +1,8 @@
 from datetime import datetime, timezone
-from typing import Optional
-
-from bson import ObjectId
-
-
-from app.shared.enums import UserRole
 
 
 class UserModel:
 
-    collection_name = "users"
 
     @staticmethod
     def create_document(
@@ -17,23 +10,44 @@ class UserModel:
         email: str,
         phone: str,
         password_hash: str,
-        role: UserRole = UserRole.USER,
+        verification_token: str,
+        verification_token_expiry,
+        role="USER",
     ):
 
+
         return {
-            "_id": ObjectId(),
 
             "username": username,
+
             "email": email.lower(),
+
             "phone": phone,
 
             "password": password_hash,
 
-            "role": role.value,
+
+            "role": role,
+
 
             "is_verified": False,
+
+
+            "verification_token": verification_token,
+
+
+            "verification_token_expiry":
+                verification_token_expiry,
+
+
             "is_active": True,
 
-            "created_at": datetime.now(timezone.utc),
-            "updated_at": datetime.now(timezone.utc),
+
+            "created_at":
+                datetime.now(timezone.utc),
+
+
+            "updated_at":
+                datetime.now(timezone.utc)
+
         }
