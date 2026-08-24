@@ -10,7 +10,7 @@ from app.modules.auth.repository import (
 from app.modules.auth.models import UserModel
 from app.modules.auth.schemas import RegisterRequest
 from app.core.security import hash_password
-
+from app.modules.notifications.email_service import send_email
 
 
 async def register_user(
@@ -68,6 +68,15 @@ async def register_user(
     user_id = await create_user(
         user_data
     )
+
+    await send_email(
+    to_email=payload.email,
+    subject="Registration Successful",
+    html_content="""
+        <h2>Welcome!</h2>
+        <p>Your account has been created successfully.</p>
+    """
+)
 
 
     return str(user_id)
