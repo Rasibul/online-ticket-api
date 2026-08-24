@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+import jwt
 from app.modules.auth.models import UserModel
 from app.modules.auth.schemas import RegisterRequest
 from app.modules.notifications.email_service import send_email
@@ -8,6 +9,7 @@ from datetime import datetime, timezone
 
 
 from app.modules.auth.repository import (
+    find_user_by_id,
     find_user_by_email,
     find_user_by_username,
     find_user_by_phone,
@@ -24,6 +26,10 @@ from app.core.security import (
     create_access_token,
     create_refresh_token
 )
+from app.core.config import settings
+
+
+
 
 
 
@@ -278,3 +284,78 @@ async def login_user(payload):
         user["role"]
 
     }
+
+
+async def get_current_user(token:str):
+
+
+    try:
+
+        payload = jwt.decode(
+
+            token,
+
+            settings.jwt_secret,
+
+            algorithms=[
+
+                settings.jwt_algorithm
+
+            ]
+
+        )
+
+
+        user_id = payload.get("user_id")
+
+
+        if not user_id:
+
+            raise HTTPException(
+
+                status_code=401,
+
+                detail="Invalid token"
+
+            )
+
+
+        user = await find_user_by_id(
+            user_id
+        )
+
+
+        if not user:
+
+            raise HTTPException(
+
+                status_code=401,
+
+                detail="User not found"
+
+            )
+
+
+        return user
+
+
+    except jwt.ExpiredSignatureError:
+
+        raise HTTPException(
+
+            status_code=401,
+
+            detail="Token has expired"
+
+        )
+
+
+    except jwt.InvalidTokenError:
+
+        raise HTTPException(
+
+            status_code=401,
+
+            detail="Invalid token"
+
+        )

@@ -14,6 +14,17 @@ async def find_user_by_email(email:str):
     )
 
 
+async def find_user_by_id(user_id):
+
+    db = get_database()
+
+    return await db.users.find_one(
+        {
+            "_id": user_id
+        }
+    )
+
+
 
 async def find_user_by_username(username:str):
 
