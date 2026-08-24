@@ -13,13 +13,19 @@ from app.modules.auth.repository import (
     find_user_by_phone,
     create_user,
     find_user_by_verification_token,
-    verify_user
+    verify_user,
+    update_refresh_token
 )
 from app.core.security import (
     hash_password,
     generate_verification_token,
-    get_token_expiry
+    get_token_expiry,
+    verify_password,
+    create_access_token,
+    create_refresh_token
 )
+
+
 
 
 
@@ -171,3 +177,104 @@ async def verify_email(token:str):
 
 
     return True
+
+
+
+
+
+async def login_user(payload):
+
+
+    user = await find_user_by_email(
+        payload.email
+    )
+
+
+    if not user:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid credentials"
+        )
+
+
+    password_valid = verify_password(
+
+        payload.password,
+
+        user["password"]
+
+    )
+
+
+    if not password_valid:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid credentials"
+        )
+
+
+    if not user["is_verified"]:
+
+        raise HTTPException(
+
+            status_code=403,
+
+            detail="Email not verified"
+
+        )
+
+
+    token_payload = {
+
+        "user_id":
+        str(user["_id"]),
+
+        "role":
+        user["role"]
+
+    }
+
+
+    access_token = (
+        create_access_token(
+            token_payload
+        )
+    )
+
+
+    refresh_token = (
+        create_refresh_token(
+            token_payload
+        )
+    )
+
+
+    await update_refresh_token(
+
+        user["_id"],
+
+        refresh_token
+
+    )
+
+
+    return {
+
+        "access_token":
+        access_token,
+
+
+        "refresh_token":
+        refresh_token,
+
+
+        "token_type":
+        "bearer",
+
+
+        "role":
+        user["role"]
+
+    }

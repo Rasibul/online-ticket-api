@@ -5,7 +5,12 @@ from app.modules.auth.schemas import (
     RegisterResponse
 )
 
-from app.modules.auth.service import register_user, verify_email
+from app.modules.auth.schemas import (
+    LoginRequest,
+    LoginResponse
+)
+
+from app.modules.auth.service import login_user, register_user, verify_email
 
 
 
@@ -52,3 +57,16 @@ async def verify_email_account(
         "Email verified successfully"
 
     }
+
+
+@router.post(
+    "/login",
+    response_model=LoginResponse
+)
+async def login(
+    payload:LoginRequest
+):
+
+    return await login_user(
+        payload
+    )

@@ -1,3 +1,5 @@
+import token
+
 from app.core.database import get_database
 
 
@@ -81,6 +83,29 @@ async def verify_user(
                 "verification_token": None,
 
                 "verification_token_expiry": None
+            }
+        }
+
+    )
+
+async def update_refresh_token(
+    user_id,
+    token
+):
+
+    db=get_database()
+
+
+    await db.users.update_one(
+
+        {
+            "_id":user_id
+        },
+
+        {
+            "$set":
+            {
+              "refresh_token":token
             }
         }
 
