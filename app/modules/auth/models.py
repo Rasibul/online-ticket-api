@@ -39,6 +39,8 @@ class UserModel:
             "verification_token_expiry":
                 verification_token_expiry,
 
+                "refresh_token": None,
+
 
             "is_active": True,
 
