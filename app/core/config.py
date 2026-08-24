@@ -19,9 +19,14 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 30
 
-    brevo_api_key: str | None = None
-    brevo_sender_email: str | None = None
-    brevo_sender_name: str | None = None
+    brevo_host: str
+    brevo_port: int = 587
+
+    brevo_user: str
+    brevo_pass: str
+
+    brevo_from_email: str
+    brevo_from_name: str
 
     stripe_secret_key: str | None = None
     stripe_webhook_secret: str | None = None
