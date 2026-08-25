@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Body, Depends
 from fastapi import Query
 from app.modules.auth.schemas import (
     RegisterRequest,
@@ -10,7 +10,7 @@ from app.modules.auth.schemas import (
     LoginResponse
 )
 
-from app.modules.auth.service import login_user, register_user, verify_email
+from app.modules.auth.service import get_current_user, get_current_user, login_user, logout_user, logout_user, refresh_access_token, register_user, verify_email
 
 
 
@@ -70,3 +70,48 @@ async def login(
     return await login_user(
         payload
     )
+
+
+@router.post(
+    "/refresh"
+)
+async def refresh_token(
+
+    refresh_token:str = Body(...)
+
+):
+
+
+    return await refresh_access_token(
+
+        refresh_token
+
+    )
+
+
+
+@router.post(
+    "/logout"
+)
+async def logout(
+
+    user=Depends(
+        get_current_user
+    )
+
+):
+
+
+    await logout_user(
+
+        user["user_id"]
+
+    )
+
+
+    return {
+
+        "message":
+        "Logout successful"
+
+    }

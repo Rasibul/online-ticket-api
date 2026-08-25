@@ -11,12 +11,15 @@ from datetime import datetime, timezone
 from app.modules.auth.repository import (
     find_user_by_id,
     find_user_by_email,
+    find_user_by_refresh_token,
     find_user_by_username,
     find_user_by_phone,
     create_user,
     find_user_by_verification_token,
+    remove_refresh_token,
     verify_user,
     update_refresh_token
+      
 )
 from app.core.security import (
     hash_password,
@@ -24,10 +27,10 @@ from app.core.security import (
     get_token_expiry,
     verify_password,
     create_access_token,
-    create_refresh_token
+    create_refresh_token,
+    decode_token,
 )
 from app.core.config import settings
-
 
 
 
@@ -359,3 +362,99 @@ async def get_current_user(token:str):
             detail="Invalid token"
 
         )
+
+async def refresh_access_token(
+    refresh_token:str
+):
+
+
+    payload = decode_token(
+        refresh_token
+    )
+
+
+    if payload.get("type") != "refresh":
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid refresh token"
+        )
+
+
+    user = await find_user_by_refresh_token(
+        refresh_token
+    )
+
+
+    if not user:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Refresh token revoked"
+        )
+
+
+    new_payload = {
+
+        "user_id":
+        str(user["_id"]),
+
+
+        "role":
+        user["role"]
+
+    }
+
+
+    new_access_token = (
+        create_access_token(
+            new_payload
+        )
+    )
+
+
+    new_refresh_token = (
+        create_refresh_token(
+            new_payload
+        )
+    )
+
+
+    await update_refresh_token(
+
+        user["_id"],
+
+        new_refresh_token
+
+    )
+
+
+    return {
+
+        "access_token":
+        new_access_token,
+
+
+        "refresh_token":
+        new_refresh_token,
+
+
+        "token_type":
+        "bearer"
+
+    }
+
+
+
+
+async def logout_user(
+    user_id
+):
+
+
+    await remove_refresh_token(
+        user_id
+    )
+
+
+    return True    
