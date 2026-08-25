@@ -3,6 +3,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 import jwt
 from app.core.config import settings
+from fastapi import HTTPException
 
 def hash_password(password: str) -> str:
 
@@ -120,3 +121,37 @@ def create_refresh_token(
 
         algorithm=settings.jwt_algorithm
     )
+
+
+
+
+
+def decode_token(token:str):
+
+    try:
+
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret,
+            algorithms=[
+                settings.jwt_algorithm
+            ]
+        )
+
+        return payload
+
+
+    except jwt.ExpiredSignatureError:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Token expired"
+        )
+
+
+    except jwt.InvalidTokenError:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )
