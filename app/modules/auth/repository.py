@@ -75,6 +75,20 @@ async def find_user_by_refresh_token(
 
     )
 
+
+async def find_user_by_verification_token(
+    token:str
+):
+
+    db = get_database()
+
+    return await db.users.find_one(
+        {
+            "verification_token": token
+        }
+    )
+
+
 async def verify_user(
     user_id
 ):
