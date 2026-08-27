@@ -149,8 +149,7 @@ async def register_user(
 
 
 
-async def verify_email(token:str):
-
+async def verify_email(token: str):
 
     user = await find_user_by_verification_token(
         token
@@ -165,11 +164,29 @@ async def verify_email(token:str):
         )
 
 
-    expiry = (
-        user["verification_token_expiry"]
+    expiry = user.get(
+        "verification_token_expiry"
     )
 
 
+    if not expiry:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Verification token expiry not found"
+        )
+
+
+    # MongoDB returns naive datetime
+    # Convert it to UTC aware datetime
+    if expiry.tzinfo is None:
+
+        expiry = expiry.replace(
+            tzinfo=timezone.utc
+        )
+
+
+    # Check token expiry
     if expiry < datetime.now(timezone.utc):
 
         raise HTTPException(
@@ -183,8 +200,9 @@ async def verify_email(token:str):
     )
 
 
-    return True
-
+    return {
+        "message": "Email verified successfully"
+    }
 
 
 
