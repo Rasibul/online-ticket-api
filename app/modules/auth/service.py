@@ -90,9 +90,7 @@ async def register_user(
     )
 
 
-    verification_token = generate_verification_token(
-        payload.email
-    )
+    verification_token = generate_verification_token()
 
     verification_token_expiry = get_token_expiry()
 
