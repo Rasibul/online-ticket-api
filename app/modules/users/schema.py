@@ -1,18 +1,31 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
+
+
+class UpdateProfileRequest(BaseModel):
+
+    username: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=50
+    )
+
+    phone: str | None = Field(
+        default=None,
+        min_length=7,
+        max_length=20
+    )
 
 
 class UserProfileResponse(BaseModel):
 
-    id:str
+    model_config = ConfigDict(
+        populate_by_name=True
+    )
 
-    username:str
-
-    email:str
-
-    phone:str
-
-    role:str
-
-    is_verified:bool
-
-    is_active:bool
+    id: str
+    username: str
+    email: str
+    phone: str
+    role: str
+    is_verified: bool
+    is_active: bool

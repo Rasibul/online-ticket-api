@@ -2,6 +2,13 @@ from fastapi import HTTPException,status
 
 from .repository import get_user_by_id
 
+from fastapi import HTTPException, status
+
+from .repository import (
+    get_user_by_id,
+    update_user_profile,
+    find_user_by_username
+)
 
 
 async def get_current_user(
@@ -38,4 +45,77 @@ async def get_current_user(
 
         "is_active":user["is_active"]
 
+    }
+
+
+async def update_current_user_profile(
+    user_id: str,
+    update_data: dict
+):
+
+    user = await get_user_by_id(
+        user_id
+    )
+
+    if not user:
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+
+    update_data = {
+        key: value.strip() if isinstance(value, str) else value
+        for key, value in update_data.items()
+        if value is not None
+    }
+
+
+    if not update_data:
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No profile data provided"
+        )
+
+
+    # Check username uniqueness
+    if "username" in update_data:
+
+        new_username = update_data["username"]
+
+        if new_username.lower() != user["username"].lower():
+
+            existing_user = await find_user_by_username(
+                new_username
+            )
+
+            if existing_user:
+
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Username already exists"
+                )
+
+
+    await update_user_profile(
+        user_id,
+        update_data
+    )
+
+
+    updated_user = await get_user_by_id(
+        user_id
+    )
+
+
+    return {
+        "id": str(updated_user["_id"]),
+        "username": updated_user["username"],
+        "email": updated_user["email"],
+        "phone": updated_user["phone"],
+        "role": updated_user["role"],
+        "is_verified": updated_user["is_verified"],
+        "is_active": updated_user["is_active"]
     }
