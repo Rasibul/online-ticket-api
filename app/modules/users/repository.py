@@ -1,15 +1,12 @@
-from app.db.mongodb import get_database
+from app.core.database import get_database
 
 from bson import ObjectId
 
 
-
 async def get_user_by_id(
-    user_id:str
+    user_id: str
 ):
-
     db = get_database()
-
 
     user = await db.users.find_one(
         {
