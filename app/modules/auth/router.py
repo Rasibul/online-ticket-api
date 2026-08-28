@@ -4,14 +4,13 @@ from app.modules.auth.schemas import (
     RegisterRequest,
     RegisterResponse
 )
-
 from app.modules.auth.schemas import (
     LoginRequest,
     LoginResponse
 )
-
 from app.modules.auth.service import get_current_user, get_current_user, login_user, logout_user, logout_user, refresh_access_token, register_user, verify_email
-
+from app.core.dependencies import get_current_user_id
+from app.modules.users.service import get_current_user
 
 
 router = APIRouter(
@@ -113,5 +112,32 @@ async def logout(
 
         "message":
         "Logout successful"
+
+    }
+
+
+
+@router.get(
+    "/me"
+)
+async def current_user(
+
+    user_id:str = Depends(
+        get_current_user_id
+    )
+
+):
+
+
+    user = await get_current_user(
+        user_id
+    )
+
+
+    return {
+
+        "success":True,
+
+        "data":user
 
     }
