@@ -4,11 +4,13 @@ from app.core.dependencies import get_current_user_id
 
 from .schema import (
     UpdateProfileRequest,
-    UserProfileResponse
+    UserProfileResponse,
+    ChangePasswordRequest
 )
 
 from .service import (
-    update_current_user_profile
+    update_current_user_profile,
+     change_current_user_password
 )
 
 
@@ -37,4 +39,29 @@ async def update_profile(
         update_data=payload.model_dump(
             exclude_unset=True
         )
+    )
+
+
+
+@router.put(
+    "/change-password"
+)
+async def change_password(
+
+    payload: ChangePasswordRequest,
+
+    user_id: str = Depends(
+        get_current_user_id
+    )
+
+):
+
+    return await change_current_user_password(
+
+        user_id=user_id,
+
+        current_password=payload.current_password,
+
+        new_password=payload.new_password
+
     )

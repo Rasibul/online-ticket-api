@@ -7,7 +7,15 @@ from fastapi import HTTPException, status
 from .repository import (
     get_user_by_id,
     update_user_profile,
-    find_user_by_username
+    find_user_by_username,
+    update_user_password
+)
+
+
+
+from app.core.security import (
+    verify_password,
+    hash_password
 )
 
 
@@ -118,4 +126,80 @@ async def update_current_user_profile(
         "role": updated_user["role"],
         "is_verified": updated_user["is_verified"],
         "is_active": updated_user["is_active"]
+    }
+
+
+
+
+async def change_current_user_password(
+    user_id: str,
+    current_password: str,
+    new_password: str
+):
+
+    user = await get_user_by_id(
+        user_id
+    )
+
+
+    if not user:
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+
+    # Verify current password
+
+    password_is_valid = verify_password(
+
+        current_password,
+
+        user["password"]
+
+    )
+
+
+    if not password_is_valid:
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+
+
+    # Prevent using the same password
+
+    if verify_password(
+        new_password,
+        user["password"]
+    ):
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be different from current password"
+        )
+
+
+    # Hash new password
+
+    hashed_password = hash_password(
+        new_password
+    )
+
+
+    # Update password and invalidate session
+
+    await update_user_password(
+
+        user_id,
+
+        hashed_password
+
+    )
+
+
+    return {
+        "message": "Password changed successfully"
     }
